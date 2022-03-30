@@ -17,6 +17,9 @@ def watch(watched_path: str, watchlist_name: str=archiver.DEFAULT_WATCHLIST):
     Raises:
         WatchlistNotFoundException: If a watchlist with $watchlist_name is not found 
         UnwatchablePathException: If $watched_path does not exist
+
+    Complexity:
+        Temporal: O(1)
     """
     watchlist_path = os.path.join(archiver.WATCHLIST_FOLDER, watchlist_name)
     watched_path = expand_path(watched_path)
@@ -44,6 +47,9 @@ def unwatch(watched_path: str, watchlist_name: str=archiver.DEFAULT_WATCHLIST):
 
     Raises:
         WatchlistNotFoundException: If a watchlist with $watchlist_name is not found 
+
+    Complexity:
+        Temporal: O(n)
     """
     watchlist_path = os.path.join(archiver.WATCHLIST_FOLDER, watchlist_name)
     watched_path = expand_path(watched_path)
@@ -55,6 +61,7 @@ def unwatch(watched_path: str, watchlist_name: str=archiver.DEFAULT_WATCHLIST):
         raise UnwatchablePathException(f"Path {watched_path} does not exist")
 
     else:
+        # O(n)
         search_and_delete_line(watchlist_path, watched_path)
 
 
@@ -69,7 +76,9 @@ def create_watchlist(watchlist_name: str):
 
     Raises:
         WatchlistExistsException: if the given name is already taken by other watchlist
-        O
+
+    Complexity:
+        Temporal: O(1)
     """
     watchlist_path = os.path.join(archiver.WATCHLIST_FOLDER, watchlist_name)
 
@@ -93,6 +102,8 @@ def delete_watchlist(watchlist_name: str):
     Raises:
         WatchlistNotFoundException: If a watchlist with $watchlist_name is not found 
         
+    Complexity:
+        Temporal: O(1)
     """
     watchlist_path = os.path.join(archiver.WATCHLIST_FOLDER, watchlist_name)
 
@@ -107,9 +118,15 @@ def enumerate_watchlists():
 
     Returns:
         list: strings of existent 0-depth files at $WATCHLIST_FOLDER
+
+    Complexity:
+        Temporal: O(n)
     """
+    # O(n)
     watchlists = [watchlist for _, _, watchlist in os.walk(archiver.WATCHLIST_FOLDER)]
+
     surface_watchlists = watchlists[0]
+
     return surface_watchlists
 
 
@@ -124,6 +141,9 @@ def enumerate_watched(watchlist_name: str=archiver.DEFAULT_WATCHLIST):
 
     Raises:
         WatchlistNotFoundException: if a watchlist with the given name doesn't exist
+
+    Complexity:
+        Temporal: O(n)
     """
     watchlist_path = os.path.join(archiver.WATCHLIST_FOLDER, watchlist_name)
 
@@ -131,6 +151,7 @@ def enumerate_watched(watchlist_name: str=archiver.DEFAULT_WATCHLIST):
         lines = []
 
         with open(watchlist_path, "r") as watchlist:
+            # O(n)
             lines = [x.strip("\n") for x in watchlist.readlines()]
 
         return lines

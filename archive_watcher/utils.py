@@ -28,6 +28,9 @@ def expand_path(path: str) -> str:
 
     Raises:
         PathNotFoundException: if the expanded relative path does not exist
+
+    Complexity:
+        Temporal: O(1)
     """
     if(os.path.isabs(path)):
         return path
@@ -40,6 +43,21 @@ def expand_path(path: str) -> str:
 
 
 def search_and_delete_line(file: str, to_delete: str):
+    """Create a temporal copy of $file were all lines will be
+    copied BUT the line that is $to_delete.
+    Once all data is copied the temporal file is dumped in $file
+    and it is deleted (the temporal file)
+
+    Parameters:
+        file (str): filepath where to search and remove
+        to_delete (str): text to remove in $file
+
+    Returns:
+        None
+
+    Complexity:
+        Temporal: O(n) to $file
+    """
     tmp_file = file + ".tmp"
     with open(file, "r") as fin:
         with open(tmp_file, "w") as fout:
@@ -48,3 +66,4 @@ def search_and_delete_line(file: str, to_delete: str):
                     fout.write(line)
 
     os.replace(tmp_file, file)
+    os.remove(tmp_file)
