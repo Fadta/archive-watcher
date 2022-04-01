@@ -1,5 +1,4 @@
 import os
-from io import FileIO
 
 
 def ensure_default_watchlist():
