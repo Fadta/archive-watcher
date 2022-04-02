@@ -35,9 +35,9 @@ def decide_backup_classification(fullpath: str) -> str:
         InvalidPathException: if $fullpath is invalid
     """
     if fullpath.startswith(archiver.USERHOME):
-        relpath =  "." + fullpath.removeprefix(archiver.USERHOME)
+        relpath =  "./user" + fullpath.removeprefix(archiver.USERHOME)
     elif fullpath.startswith("/"):
-        relpath = "." + fullpath
+        relpath = "./root" + fullpath
     else:
         raise exc.InvalidPathException(f"Path {fullpath} is not a valid path")
 
