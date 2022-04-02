@@ -113,11 +113,11 @@ def delete_watchlist(watchlist_name: str):
     os.remove(watchlist_name)
 
 
-def enumerate_watchlists():
+def enumerate_watchlists() -> list[str]:
     """Gets all the existent watchlists 
 
     Returns:
-        list: strings of existent 0-depth files at $WATCHLIST_FOLDER
+        list[str]: strings of existent 0-depth files at $WATCHLIST_FOLDER
 
     Complexity:
         Temporal: O(n)
@@ -130,7 +130,7 @@ def enumerate_watchlists():
     return surface_watchlists
 
 
-def enumerate_watched(watchlist_name: str=archiver.DEFAULT_WATCHLIST):
+def enumerate_watched(watchlist_name: str=archiver.DEFAULT_WATCHLIST) -> list[str]:
     """Gets all the watched paths in a watchlist
 
     Parameters:
