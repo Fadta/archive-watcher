@@ -13,6 +13,9 @@ class WatchlistNotFoundException(WatchlistException):
 class WatchlistExistsException(WatchlistException):
     pass
 
+class InvalidPathException(PathException):
+    pass
+
 class PathNotFoundException(PathException):
     pass
 
