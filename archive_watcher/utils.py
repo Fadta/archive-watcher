@@ -1,4 +1,10 @@
 import os
+import os.path
+import app_constants as archiver
+
+
+def get_watchlist_path(watchlist_name: str) -> str:
+    return os.path.join(archiver.WATCHLIST_FOLDER, watchlist_name)
 
 
 def ensure_default_watchlist():
