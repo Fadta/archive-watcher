@@ -2,7 +2,8 @@ import os
 import os.path
 import app_constants as archiver
 import utils
-from app_exceptions import WatchlistNotFoundException, UnwatchablePathException, WatchlistExistsException
+import app_exceptions as exc
+
 
 def watch(watched_path: str, watchlist_name: str=archiver.DEFAULT_WATCHLIST):
     """Adds a path to a watchlist
@@ -25,10 +26,10 @@ def watch(watched_path: str, watchlist_name: str=archiver.DEFAULT_WATCHLIST):
     watched_path = utils.expand_path(watched_path)
 
     if(not os.path.exists(watchlist_path)):
-        raise WatchlistNotFoundException(f"watchlist {watchlist_name} does not exist")
+        raise exc.WatchlistNotFoundException(f"watchlist {watchlist_name} does not exist")
 
     elif not os.path.exists(watched_path):
-        raise UnwatchablePathException(f"Path {watched_path} does not exist")
+        raise exc.UnwatchablePathException(f"Path {watched_path} does not exist")
 
     else:
         path_to_append = watched_path + "\n"
@@ -55,10 +56,10 @@ def unwatch(watched_path: str, watchlist_name: str=archiver.DEFAULT_WATCHLIST):
     watched_path = utils.expand_path(watched_path)
 
     if(not os.path.exists(watchlist_path)):
-        raise WatchlistNotFoundException(f"watchlist {watchlist_name} does not exist")
+        raise exc.WatchlistNotFoundException(f"watchlist {watchlist_name} does not exist")
 
     elif not os.path.exists(watched_path):
-        raise UnwatchablePathException(f"Path {watched_path} does not exist")
+        raise exc.UnwatchablePathException(f"Path {watched_path} does not exist")
 
     else:
         # O(n)
@@ -83,7 +84,7 @@ def create_watchlist(watchlist_name: str):
     watchlist_path = utils.get_watchlist_path(watchlist_name)
 
     if os.path.exists(watchlist_path):
-        raise WatchlistExistsException(f"{watchlist_name} already exists")
+        raise exc.WatchlistExistsException(f"{watchlist_name} already exists")
 
     open(watchlist_path, "a").close()
     
@@ -108,7 +109,7 @@ def delete_watchlist(watchlist_name: str):
     watchlist_path = utils.get_watchlist_path(watchlist_name)
 
     if not os.path.exists(watchlist_path):
-        raise WatchlistNotFoundException(f"{watchlist_name} does not exist")
+        raise exc.WatchlistNotFoundException(f"{watchlist_name} does not exist")
 
     os.remove(watchlist_name)
 
@@ -157,7 +158,7 @@ def enumerate_watched(watchlist_name: str=archiver.DEFAULT_WATCHLIST) -> list[st
         return lines
 
     else:
-        raise WatchlistNotFoundException(f"Watchlist {watchlist_name} doesn't exist")
+        raise exc.WatchlistNotFoundException(f"Watchlist {watchlist_name} doesn't exist")
 
 
 def watched2disk(watchlist_name: str, backup_folder_apath: str, unwatch_deleted_paths: bool=False):
@@ -165,7 +166,7 @@ def watched2disk(watchlist_name: str, backup_folder_apath: str, unwatch_deleted_
 
     Parameters:
         watchlist_name (str): watchlist to search for watched files
-        backup_folder_apath (str): destination folder where copies will go
+        backup_folder_apath (str): destination folder where copies will go (absolute path)
         unwatch_deleted_paths (bool): if set to True, it will unwatch deleted paths
             if set to false, it will raise an Error if a path does not exist
 
@@ -174,5 +175,39 @@ def watched2disk(watchlist_name: str, backup_folder_apath: str, unwatch_deleted_
 
     Raises:
         FileNotFoundError: if unwatch_deleted_paths=False and a path was not found
+    """
+    watchlist_path = utils.get_watchlist_path(watchlist_name)
+    with open(watchlist_path, "r") as watchlist:
+        filein_path = watchlist.readline().removesuffix("\n")
+
+        while filein_path:
+
+            # check for existence
+            if not os.path.exists(filein_path):
+                if(unwatch_deleted_paths):
+                    unwatch(filein_path, watchlist_name)
+                    filein_path = watchlist.readline()
+                    continue
+                else:
+                    raise FileNotFoundError(f"File {filein_path} was not found, check if the path is correct and the file exists")
+
+            # decide if it goes to user or root folder
+            fileout_path = utils.decide_backup_classification(filein_path)
+            fileout_path = os.path.join(backup_folder_apath, fileout_path)
+            fileout_path = os.path.abspath(fileout_path)
+
+            utils.copy(filein_path, fileout_path)
+
+            filein_path = watchlist.readline().removesuffix("\n")
+
+
+def build(backup_folder_apath: str, overwrite_existing_files: bool):
+    """from a given backup_folder created by this app, build automatically
+    the present files
+
+    Parameters:
+        backup_folder_apath (str): absolute path to the backup folder
+        overwrite_existing_files (bool): if enabled, existing files will be
+            overwritten, if disabled they will be skipped
     """
     pass

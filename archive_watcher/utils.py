@@ -1,6 +1,47 @@
 import os
 import os.path
+import shutil
+import app_exceptions as exc
 import app_constants as archiver
+
+
+def copy_file(ipath: str, opath: str):
+    shutil.copyfile(ipath, opath)
+
+
+def copy_dir(ipath: str, opath: str):
+    shutil.copytree(ipath, opath)
+
+
+def copy(ipath: str, opath: str):
+    if os.path.isfile(ipath):
+        copy_file(ipath, opath)
+    else:
+        copy_dir(ipath, opath)
+
+
+def decide_backup_classification(fullpath: str) -> str:
+    """decide internal classification in backup folder:
+        user: if the path is after the $HOME environment variable
+        root (for UNIX): if path is not at $HOME and path starts with '/'
+    
+    Parameters:
+        fullpath (str): path to evaluate
+
+    Returns:
+        (str): path relative to the backup folder
+    
+    Raises:
+        InvalidPathException: if $fullpath is invalid
+    """
+    if fullpath.startswith(archiver.USERHOME):
+        relpath =  "." + fullpath.removeprefix(archiver.USERHOME)
+    elif fullpath.startswith("/"):
+        relpath = "." + fullpath
+    else:
+        raise exc.InvalidPathException(f"Path {fullpath} is not a valid path")
+
+    return relpath
 
 
 def get_watchlist_path(watchlist_name: str) -> str:
@@ -8,7 +49,7 @@ def get_watchlist_path(watchlist_name: str) -> str:
 
 
 def ensure_default_watchlist():
-    """Ensures that a default watchlist exists,
+    """Ensures that a default watchlist exists
     creating it if it doesn't exist
 
     Returns:
